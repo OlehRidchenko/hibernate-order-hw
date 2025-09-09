@@ -2,12 +2,15 @@ package mate.academy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
+
 import mate.academy.exception.AuthenticationException;
 import mate.academy.exception.RegistrationException;
 import mate.academy.lib.Injector;
 import mate.academy.model.CinemaHall;
 import mate.academy.model.Movie;
 import mate.academy.model.MovieSession;
+import mate.academy.model.ShoppingCart;
 import mate.academy.model.User;
 import mate.academy.security.AuthenticationService;
 import mate.academy.service.CinemaHallService;
@@ -57,7 +60,7 @@ public class Main {
         yesterdayMovieSession.setShowTime(LocalDateTime.now().minusDays(1L));
 
         MovieSessionService movieSessionService =
-                (MovieSessionService) injector.getInstance(MovieSessionService.class);;
+                (MovieSessionService) injector.getInstance(MovieSessionService.class);
         movieSessionService.add(tomorrowMovieSession);
         movieSessionService.add(yesterdayMovieSession);
 
@@ -73,30 +76,32 @@ public class Main {
         UserService userService = (UserService)
                 injector.getInstance(UserService.class);
         User userFromDb = new User();
-        if (userService.findByEmail("alice@gmail.com").isPresent()) {
-            userFromDb = userService.findByEmail("alice@gmail.com").get();
+        Optional<User> optional = userService.findByEmail("alice@gmail.com");
+        if (optional.isPresent()) {
+            userFromDb = optional.get();
         }
 
         ShoppingCartService shoppingCartService =
                 (ShoppingCartService) injector
                         .getInstance(ShoppingCartService.class);
-        System.out.println(shoppingCartService.getByUser(userFromDb));
+        ShoppingCart cart = shoppingCartService.getByUser(userFromDb);
+
+        System.out.println(cart);
 
         shoppingCartService.addSession(tomorrowMovieSession, userFromDb);
-        System.out.println(shoppingCartService.getByUser(userFromDb));
+        System.out.println(cart);
 
         shoppingCartService.clearShoppingCart(
                 shoppingCartService.getByUser(userFromDb));
-        System.out.println(shoppingCartService.getByUser(userFromDb));
+        System.out.println(cart);
 
         shoppingCartService.addSession(yesterdayMovieSession, userFromDb);
         shoppingCartService.addSession(tomorrowMovieSession, userFromDb);
-        System.out.println(shoppingCartService.getByUser(userFromDb));
+        System.out.println(cart);
 
         OrderService orderService =
                 (OrderService) injector.getInstance(OrderService.class);
-        System.out.println(orderService.completeOrder(
-                shoppingCartService.getByUser(userFromDb)));
+        System.out.println(orderService.completeOrder(cart));
         System.out.println(orderService.getOrdersHistory(userFromDb));
     }
 }
