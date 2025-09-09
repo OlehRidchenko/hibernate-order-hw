@@ -90,7 +90,7 @@ public class Main {
         shoppingCartService.addSession(tomorrowMovieSession, userFromDb);
         System.out.println(cart);
 
-        shoppingCartService.clearShoppingCart(
+        shoppingCartService.clear(
                 shoppingCartService.getByUser(userFromDb));
         System.out.println(cart);
 
